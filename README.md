@@ -1,4 +1,4 @@
-# Artifact for PDSW submission: Towards Scalable Learning Model Repositories with Fine-Grain Access and Persistency Support"
+# Artifact for PDSW submission: Towards Scalable Learning Model Repositories with Fine-Grain Access and Persistency Support
 
 
 ## Structure
