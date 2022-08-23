@@ -1,0 +1,25 @@
+FLAGS=-O3
+LIB_FLAGS=$(FLAGS) -shared -fPIC
+CC=g++
+LIBS=-lmargo -labt -lmercury -lpthread -lrocksdb
+DEFS=-D__INFO -D__BENCHMARK -D__ASSERT
+
+TEST_SRC=graph_test.cpp
+CLIENT_SRC=client.cpp model_client.cpp
+
+SERVER_SRC=server.cpp model_server.cpp
+CLIENT_LIB_SRC=client.cpp model_client.cpp
+TARGETS=server
+
+all: $(TARGETS)
+server: $(SERVER_SRC)
+	$(CC) $(FLAGS) -I$(HOME)/install/include -L$(HOME)/install/lib -std=c++17 $(DEFS) $(SERVER_SRC) -o server $(LIBS)
+client_lib: $(CLIENT_LIB_SRC)
+	$(CC) $(LIB_FLAGS) -I$(HOME)/install/include -L$(HOME)/install/lib -std=c++17 $(DEFS) $(CLIENT_LIB_SRC) -o libmodel_client.so $(LIBS)
+
+client: $(CLIENT_SRC)
+	$(CC) $(FLAGS) -I$(HOME)/install/include -L$(HOME)/install/lib -std=c++17 $(DEFS) $(CLIENT_SRC) -o client $(LIBS)
+test: $(TEST_SRC)
+	$(CC) $(FLAGS) -I$(HOME)/install/include -L$(HOME)/install/lib -std=c++17 $(DEFS) $(TEST_SRC) -o test
+clean:
+	rm -rf $(TARGETS) *~

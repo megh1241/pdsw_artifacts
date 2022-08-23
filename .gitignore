@@ -1,0 +1,5 @@
+CMakeCache.txt
+CMakeFiles/
+*.so
+server
+cmake_install.cmake
