@@ -6,8 +6,8 @@ import matplotlib.patches as mpatches
 import math
 
 profile_key_index_map = {
-    'Write to Memtable': (3,4),
-    'Write delays': (2,3),
+    'Write to Memtable': (2,3),
+    'Write delays': (3,4),
     'Write Other': (4,5),
     'Read from blocks': (5,6),
     'Read from Memtable':(4,5) ,
@@ -124,27 +124,24 @@ for size_iter, tensor_size in enumerate(sizes):
         width = 0.2
         jiter=0
         plot_handles = {}
+        num_keys = len(keys)
         for case_iter, item in enumerate(cases):
             bar_dict = bar_main_dict[item]
             x = [a + jiter for a in x_main]
             jiter+=0.2
-            ax[main_iter].bar(
-                x, 
-                bar_dict[keys[0]],  
-                width=width, 
-                color=color_dict[keys[0]], align='center', 
-                data=None, hatch=hatch_dict[item], 
-                edgecolor='black'
-            )
-            for i in range(1,len(keys)): 
+            x_len = len(x)
+            curr_height = [0]*x_len
+            for i in range(num_keys): 
                 ax[main_iter].bar(
                     x, 
                     bar_dict[keys[i]],  
-                    bottom=bar_dict[keys[i-1]], width=width, 
+                    bottom=curr_height, width=width, 
                     color=color_dict[keys[i]], align='center', 
                     data=None, hatch=hatch_dict[item], 
                     edgecolor='black'
                 )
+                for j in range(x_len):
+                    curr_height[j] += bar_dict[keys[i]][j] 
 
 
         xlabels =[str(percent) + '%' for percent in percent_layers]

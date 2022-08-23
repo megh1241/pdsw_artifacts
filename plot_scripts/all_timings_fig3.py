@@ -151,46 +151,38 @@ for size_iter, tensor_size in enumerate(sizes):
         width = 0.2
         jiter=0
         plot_handles = {}
+        x_len = len(x_main)
+        num_keys_layers = len(keys_layers)
         for case_iter, item in enumerate(cases):
             bar_dict = bar_main_dict[item]
             x = [a + jiter for a in x_main]
             jiter+=0.2
-            ax[0][main_iter].bar(
-                x, 
-                bar_dict[keys_layers[0]],  
-                width=width, 
-                color=color_dict[keys_layers[0]], align='center', 
-                data=None, hatch=hatch_dict[item], 
-                edgecolor='black'
-            )
-            for i in range(1,len(keys_layers)): 
+            curr_height_layers = [0] * x_len
+            for i in range(num_keys_layers): 
                 ax[0][main_iter].bar(
                     x, 
                     bar_dict[keys_layers[i]],  
-                    bottom=bar_dict[keys_layers[i-1]], width=width, 
+                    bottom=curr_height_layers, width=width, 
                     color=color_dict[keys_layers[i]], align='center', 
                     data=None, hatch=hatch_dict[item], 
                     edgecolor='black'
                 )
+                for j in range(x_len):
+                    curr_height_layers[j] += bar_dict[keys_layers[i]][j]
+            
 
-            ax[1][main_iter].bar(
-                x, 
-                bar_dict[keys_metadata[0]],  
-                width=width, 
-                color=color_dict[keys_metadata[0]], align='center', 
-                data=None, hatch=hatch_dict[item], 
-                edgecolor='black',
-            )
-
+            curr_height_metadata = [0] * x_len
             for i in range(1,len(keys_metadata)): 
                 ax[1][main_iter].bar(
                     x, 
                     bar_dict[keys_metadata[i]],  
-                    bottom=bar_dict[keys_metadata[i-1]], width=width, 
+                    bottom=curr_height_metadata, width=width, 
                     color=color_dict[keys_metadata[i]], align='center', 
                     data=None, hatch=hatch_dict[item], 
                     edgecolor='black',
                 )
+                for j in range(x_len):
+                    curr_height_metadata[j] += bar_dict[keys_metadata[i]][j]
 
 
         xlabels =[str(percent) + '%' for percent in percent_layers]
