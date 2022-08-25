@@ -293,50 +293,60 @@ std::pair<prefix_t, timestamp_t> model_server_t::get_prefix(const digraph_t &chi
 }
 
 
-void model_server_t::init_rocksdb(uint16_t provider_id){
+void model_server_t::init_rocksdb(uint16_t provider_id, std::string const& rocksdb_config){
     rocksdb::Options options;
     options.compression = rocksdb::CompressionType::kNoCompression;
     options.create_if_missing = true;
     options.max_background_compactions = 4;
     options.max_background_flushes = 2;
-    options.use_direct_reads = true;
-    options.use_direct_io_for_flush_and_compaction = true;
+    
+    if (rocksdb_config.compare(std::string("default_tempfs")) != 0 ) {  
+        options.use_direct_reads = true;
+        options.use_direct_io_for_flush_and_compaction = true;
+    }
     options.compaction_pri = rocksdb::CompactionPri::kMinOverlappingRatio;
     options.create_if_missing = true;
     
     uint64_t block_size = 1024;
     uint64_t t = 20;
     uint64_t cache_size = block_size * block_size * block_size * t;
-    
-    /*options.write_buffer_size = cache_size ; 
-    BlockBasedTableOptions table_options;
-    auto cache = rocksdb::NewLRUCache(cache_size); 
-    table_options.block_cache = cache;
-    
-    table_options.cache_index_and_filter_blocks = true;
-    table_options.block_size = cache_size / t;
-    table_options.pin_l0_filter_and_index_blocks_in_cache = true;
-    auto table_factory = NewBlockBasedTableFactory(table_options);
-    options.table_factory.reset(table_factory);
+
+    if (rocksdb_config.compare(std::string("large_memtable_pfs")) == 0 ) {  
+        options.write_buffer_size = cache_size ; 
+        BlockBasedTableOptions table_options;
+        auto cache = rocksdb::NewLRUCache(cache_size); 
+        table_options.block_cache = cache;
+        table_options.cache_index_and_filter_blocks = true;
+        table_options.block_size = cache_size / t;
+        table_options.pin_l0_filter_and_index_blocks_in_cache = true;
+        auto table_factory = NewBlockBasedTableFactory(table_options);
+        options.table_factory.reset(table_factory);
+    } 
     options.level_compaction_dynamic_level_bytes = true;
-    */
     //options.env->SetBackgroundThreads(6, rocksdb::Env::Priority::HIGH);
     //options.env->SetBackgroundThreads(4, rocksdb::Env::Priority::LOW); 
     //std::string db_filename("/dev/shm/meghproov1");
     std::string root_dir("/home/mmadhya1/");
-    //std::string root_dir("/dev/shm/");
-    auto db_filename = root_dir + std::string("meghaanardb") + std::to_string(provider_id);
+    
+    if (rocksdb_config.compare(std::string("default_tempfs")) == 0 ) {  
+        std::string root_dir_temp("/dev/shm/");
+        root_dir = std::move(root_dir_temp);
+    }else{
+        std::string root_dir_temp("/home/mmadhya1/");
+        root_dir = std::move(root_dir_temp);
+    }
+    auto db_filename = root_dir + std::string("rdb") + std::to_string(provider_id);
     auto status = rocksdb::DB::Open(options, db_filename, &db);
     assert(status.ok());   
 }
 
 
-model_server_t::model_server_t(tl::engine& e, uint16_t provider_id, uint32_t num_procs, std::string server_policy)
+model_server_t::model_server_t(tl::engine& e, uint16_t provider_id, uint32_t num_procs, std::string const& server_policy, std::string const& rocksdb_config)
         : tl::provider<model_server_t>(e, provider_id), request_pool(tl::pool::create(tl::pool::access::spmc)) {
             self_provider_id = provider_id;
             policy=server_policy;
             if (policy.compare(std::string("rocksdb")) == 0){
-                init_rocksdb(provider_id);
+                init_rocksdb(provider_id, rocksdb_config);
             }
             unsigned int n = std::thread::hardware_concurrency();
             std::cout << n << " concurrent threads are supported.\n";

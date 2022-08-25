@@ -16,9 +16,6 @@
 #include <rocksdb/utilities/transaction.h>
 #include <rocksdb/utilities/optimistic_transaction_db.h>
 
-
-
-
 namespace tl = thallium;
 using namespace std::chrono;
 
@@ -48,7 +45,7 @@ class model_server_t : public tl::provider<model_server_t> {
     std::unordered_map<vertex_t, layer_info_t> layer_store;
     tl::mutex store_lock;
 public:
-    model_server_t(tl::engine& e, uint16_t provider_id = 0, uint32_t num_procs=1, std::string server_policy=std::string("map"));
+    model_server_t(tl::engine& e, uint16_t provider_id = 0, uint32_t num_procs=1, std::string const& server_policy=std::string("map"), std::string const& rocksdb_config=std::string("default_pfs"));
     ~model_server_t();
     timestamp_t store_meta(const digraph_t &g, const composition_t &comp );
     std::pair<prefix_t, timestamp_t> get_prefix(const digraph_t &child );
@@ -68,7 +65,7 @@ public:
                     const model_id_t &owner, std::vector<segment_t>&segments, std::vector<uint64_t> &timestamps);
     bool update_ref_counter(const model_id_t &owner, const vertex_list_t &layer_id, int value);
     bool clear_timestamps(const model_id_t &id);
-    void init_rocksdb(uint16_t provider_id);
+    void init_rocksdb(uint16_t provider_id, std::string const& rocksdb_config);
     //void set_rocksdb_params(uint16_t provider_id);
     std::vector<uint64_t> get_timestamps(const model_id_t &id);
 };

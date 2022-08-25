@@ -229,9 +229,6 @@ for size in size_arr:
         if percent_transfer > 0:
             transferred, transferred_id = transfer_method.transfer(model_id, model)
             ts = transfer_method.get_time_stamps()
-            ts_2 = zero_center(ts)
-            print("Transfer", flush=True)
-            print(ts_2, flush=True)
             append_results_to_dict(ts, results_dict, percent_transfer, action='transfer', size=size)
             transfer_method.clear_time_stamps()
         else:
@@ -241,9 +238,6 @@ for size in size_arr:
         if suffix:
             transfer_method.store(model_id, model, suffix)
             ts = transfer_method.get_time_stamps()
-            #ts_2 = zero_center(ts)
-            #print("Store", flush=True)
-            #print(ts_2, flush=True)
             transfer_method.clear_time_stamps()
             append_results_to_dict(ts, results_dict, 100-percent_transfer, action='store', size=size)
         del model
